@@ -24,6 +24,16 @@ local E = {
     PlayerSpawned      = 'clp:player:spawned',     -- C→S: Ped fertig im Spiel
     PlayerSwitchedChar = 'clp:player:switchedChar',-- bei Charakterwechsel ohne Reconnect
 
+    -- Charakter-Lifecycle (Phase 1+; UI dazu kommt in Phase 4)
+    CharList           = 'clp:char:list',          -- S→C: { chars = {...}, maxChars = N }
+    CharRequestList    = 'clp:char:requestList',   -- C→S: "gib mir meine Charaktere"
+    CharCreate         = 'clp:char:create',        -- C→S: { firstname, lastname, gender, ... }
+    CharCreated        = 'clp:char:created',       -- S→C: { citizenid, slot, ok, err? }
+    CharSelect         = 'clp:char:select',        -- C→S: { citizenid }
+    CharSelected       = 'clp:char:selected',      -- S→C: bestaetigt, danach folgt PlayerLoaded
+    CharDelete         = 'clp:char:delete',        -- C→S: { citizenid }  (soft-delete)
+    CharDeleted        = 'clp:char:deleted',       -- S→C: { citizenid, ok, err? }
+
     -- Money
     MoneyChanged       = 'clp:money:changed',      -- C/S: { account, oldValue, newValue, reason }
     MoneyAdded         = 'clp:money:added',        -- nur Add-Events (für Analytics)

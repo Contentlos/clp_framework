@@ -5,7 +5,10 @@
 ]]
 
 local function banner()
-    local mode = Config.SkeletonMode and 'SKELETON' or 'NORMAL'
+    local mode
+    if Config.SkeletonMode then mode = 'SKELETON'
+    elseif Config.AutoCharSelect then mode = 'AUTO-CHAR'
+    else mode = 'CHAR-SELECT' end
     print('')
     print('^2========================================================^7')
     print(('^2  clp_framework v%s  —  Phase %d  —  %s^7'):format(CLP.Version, CLP.Phase, mode))
@@ -13,6 +16,8 @@ local function banner()
     print('^2========================================================^7')
     if Config.SkeletonMode then
         CLP.Warn(CLP.L.skeleton_mode_warning)
+    elseif CLP.Phase == 1 then
+        CLP.Log(CLP.L.phase1_mode_info)
     end
 end
 

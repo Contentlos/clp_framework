@@ -26,7 +26,7 @@ use_experimental_fxv2_oal 'yes'
 
 name 'clp_framework'
 author 'Contentlos / CLP'
-version '0.1.0-phase0'
+version '0.2.0-phase1'
 description 'CLP-Framework Core (Player, Money, Jobs, Inventory, Vehicles, Doors, Phone-Stub) mit ESX-Bridge'
 repository 'https://github.com/Contentlos/clp_framework'
 
@@ -72,6 +72,8 @@ server_scripts {
     'server/identity.lua',
     'server/permissions.lua',
     'server/logger.lua',
+    'server/users.lua',
+    'server/characters.lua',
     'server/player.lua',
     'server/players.lua',
     'server/money.lua',

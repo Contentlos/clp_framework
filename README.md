@@ -9,8 +9,8 @@
 
 | Phase | Inhalt | Status |
 |-------|--------|--------|
-| **0** | Skeleton, Core-Loader, DB-Schema, Identity, ESX-Bridge | ✅ aktuell |
-| 1 | Player-Klasse vollständig (Money/Persistence/Login/Char-Select) | ⏳ geplant |
+| 0 | Skeleton, Core-Loader, DB-Schema, Identity, ESX-Bridge | erledigt |
+| **1** | Player-Persistence, User-Upsert, Char-Lifecycle (List/Create/Select/Delete), Auto-Save | aktuell |
 | 2 | Jobs/Grades-Registry, Salary-Tick, ESX-Job-Kompat | ⏳ geplant |
 | 3 | Logger ausbauen (Discord-Webhook), Commands (/setjob /addmoney) | ⏳ geplant |
 | 4 | `modules/ui` voll (Notify / Menu / Progress / Input — eigene NUI) | ⏳ geplant |
@@ -20,9 +20,11 @@
 | 8 | `modules/phone` Stub für späteres Phone-Resource | ⏳ geplant |
 | 9 | Doku, Migration-Guide ESX→CLP, Beispiel-Resource | ⏳ geplant |
 
-> **Aktuell läuft das Framework im SKELETON-MODE** (`Config.SkeletonMode = true`).
-> Spieler werden zwar geladen und der ESX-Bridge funktioniert (für `clp_gmenu` etc.),
-> aber **keine Charakter-Daten aus der DB** werden geholt. Wird in Phase 1 ausgeschaltet.
+> **Aktuell: Phase 1 — SkeletonMode ist AUS.** Spieler-Charaktere werden aus
+> `clp_characters` geladen, Geld/Job/Metadata werden auto-gespeichert (alle 5 Min +
+> bei Disconnect + bei Resource-Stop). Die Char-Select-NUI existiert noch nicht;
+> bis Phase 4 nutzen wir `Config.AutoCharSelect = true` — d.h. last-played wird
+> automatisch geladen, oder ein Default-Charakter wird angelegt.
 
 ---
 
@@ -67,9 +69,10 @@
    (`clp_users`, `clp_characters`, `clp_character_log`, `clp_jobs`, `clp_job_grades`,
    `clp_character_inventory`, `clp_character_vehicles`, `clp_doors`, `clp_kv`).
 
-> **Phase 0:** Spieler werden im SkeletonMode geladen — d.h. die ESX-Bridge funktioniert
-> sofort (für `clp_gmenu`), aber keine echten Charakter-Daten. Charakter-Auswahl + DB-Load
-> kommen in Phase 1.
+> **Phase 1:** Beim ersten Connect wird ein User-Row in `clp_users` angelegt, dann ein
+> Default-Charakter in `clp_characters`. Bei weiteren Connects wird der zuletzt-gespielte
+> Charakter automatisch geladen (`Config.AutoCharSelect = true`). Multi-Char-Auswahl
+> kommt mit der NUI in Phase 4.
 
 ### Debug
 
@@ -98,11 +101,13 @@ clp_framework/
 │   ├── identity.lua                 — Identifier-Resolver
 │   ├── permissions.lua              — Groups, IsAdmin
 │   ├── logger.lua                   — Console/Audit
-│   ├── player.lua                   — Player-Klasse
-│   ├── players.lua                  — Manager (CLP.GetPlayer, LoadPlayer, UnloadPlayer)
+│   ├── users.lua                    — clp_users CRUD (Ensure, GetRow, SetGroup, IsBanned)
+│   ├── characters.lua               — clp_characters CRUD (List, Create, Load, SoftDelete, Save)
+│   ├── player.lua                   — Player-Klasse (AttachCharacter, GetMoney, Save…)
+│   ├── players.lua                  — Manager (CLP.GetPlayer, LoadPlayer, AttachCharacter, SaveAll)
 │   ├── money.lua                    — CLP.Money:Add/Remove/Has/Transfer
 │   ├── jobs.lua                     — CLP.Jobs:SetJob/SetDuty
-│   ├── events.lua                   — playerConnecting / Joining / Dropped
+│   ├── events.lua                   — playerConnecting/Joining/Dropped + Char-Select-Flow
 │   ├── commands.lua                 — /clpinfo /clpid /clpwho
 │   ├── sql/schema.sql               — Initial-Schema (auto-applied)
 │   └── bridge/esx.lua               — ESX-Legacy-Shape (xPlayer, GetPlayerFromId, …)
@@ -124,7 +129,7 @@ clp_framework/
 
 ---
 
-## API (Phase 0)
+## API (Phase 0 + 1)
 
 ### Server
 
@@ -169,10 +174,42 @@ CLP.Perms.GetGroup(src)
 CLP.Log.info('Test %d', 42)
 CLP.Log.audit(citizenid, 'money_add', { amount = 100 }, 'system')
 
+-- Users (Phase 1) -- clp_users-Tabelle
+local ok, identifier, row, isNew = CLP.Users.Ensure(src)
+CLP.Users.GetRow(identifier)
+CLP.Users.SetGroup(identifier, 'admin')
+CLP.Users.IsBanned(identifier)             -- -> bool, reason?
+
+-- Characters (Phase 1) -- clp_characters-Tabelle
+local rows = CLP.Characters.ListByUser(identifier)
+local n    = CLP.Characters.CountByUser(identifier)
+local row  = CLP.Characters.LoadByCitizenId('K3F7A21B')
+local last = CLP.Characters.GetLastPlayed(identifier)
+local ok, cid = CLP.Characters.Create(identifier, { firstname='Max', lastname='Mustermann', gender='m' })
+CLP.Characters.SoftDelete(cid)
+CLP.Characters.Save(cid, { cash=100, bank=200, job='police', job_grade=2, metadata={...} })
+
+-- Player-Manager (Phase 1)
+CLP.AttachCharacter(src, row)              -- befuellt Player aus clp_characters-Row
+CLP.SaveAll('reason')                      -- speichert alle dirty Spieler (Auto-Save nutzt das)
+p:IsAttached()                             -- hat ein Charakter geladen?
+p:GetSerializableData()                    -- subset fuer Client (PlayerLoaded-Payload)
+p:SetPosition({ x=0, y=0, z=70, h=0 })
+p:Save()                                   -- async UPDATE clp_characters
+
 -- Events (Konstanten)
-CLP.Events.PlayerLoaded   -- 'clp:player:loaded'
-CLP.Events.MoneyChanged   -- 'clp:money:changed'
-CLP.Events.JobChanged     -- 'clp:job:changed'
+CLP.Events.PlayerLoaded     -- 'clp:player:loaded'
+CLP.Events.PlayerDropped    -- 'clp:player:dropped'
+CLP.Events.MoneyChanged     -- 'clp:money:changed'
+CLP.Events.JobChanged       -- 'clp:job:changed'
+CLP.Events.CharList         -- 'clp:char:list'         (S->C)
+CLP.Events.CharRequestList  -- 'clp:char:requestList'  (C->S)
+CLP.Events.CharCreate       -- 'clp:char:create'       (C->S)
+CLP.Events.CharCreated      -- 'clp:char:created'      (S->C)
+CLP.Events.CharSelect       -- 'clp:char:select'       (C->S)
+CLP.Events.CharSelected     -- 'clp:char:selected'     (S->C)
+CLP.Events.CharDelete       -- 'clp:char:delete'       (C->S)
+CLP.Events.CharDeleted      -- 'clp:char:deleted'      (S->C)
 ```
 
 ### Client
@@ -184,6 +221,16 @@ CLP.GetJob()
 CLP.GetCitizenId()
 CLP.GetFullName()
 CLP.IsLoaded          -- bool
+
+-- Char-Lifecycle (Phase 1; UI dazu kommt in Phase 4)
+CLP.RequestCharList()
+CLP.CreateCharacter({ firstname='Max', lastname='Mustermann', gender='m' })
+CLP.SelectCharacter('K3F7A21B')
+CLP.DeleteCharacter('K3F7A21B')
+CLP.OnCharList(function(data)          -- data = { chars = {...}, maxChars = N }
+    for _, row in ipairs(data.chars) do print(row.citizenid, row.firstname) end
+end)
+AddEventHandler('clp:client:charSelected', function(data) ... end)
 
 -- UI
 CLP.UI.Notify('Hallo Welt', 'success', 4000)

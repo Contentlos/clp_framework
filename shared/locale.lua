@@ -17,6 +17,7 @@ local L = {
     framework_started        = 'CLP-Framework gestartet (Phase %d, v%s).',
     framework_stopped        = 'CLP-Framework wird beendet.',
     skeleton_mode_warning    = 'SKELETON-MODE aktiv — Spieler werden NICHT geladen. (Phase 0)',
+    phase1_mode_info         = 'PHASE 1 aktiv — volle Charakter-Persistence, Auto-Char-Select (UI folgt in Phase 4).',
 
     -- ============================================================
     --  DB
@@ -36,6 +37,22 @@ local L = {
     player_no_identifier     = 'Spieler %s hat keinen verwertbaren Identifier — Verbindung abgelehnt.',
     player_save_ok           = 'Spieler %s gespeichert.',
     player_save_failed       = 'Speichern von Spieler %s fehlgeschlagen: %s',
+
+    -- ============================================================
+    --  USER / CHARACTER (Phase 1)
+    -- ============================================================
+    user_created             = 'Neuer User registriert: %s',
+    user_returning           = 'Wiederkehrender User: %s (Gruppe: %s)',
+    user_banned              = 'User %s ist gebannt: %s',
+    char_list_loaded         = 'Charakter-Liste fuer %s geladen (%d Charaktere).',
+    char_created             = 'Charakter erstellt: %s %s (citizenid=%s, slot=%d).',
+    char_create_failed       = 'Charakter-Erstellung fehlgeschlagen: %s',
+    char_max_reached         = 'Charakter-Limit erreicht (%d/%d).',
+    char_selected            = 'Charakter ausgewaehlt: %s %s (citizenid=%s).',
+    char_select_failed       = 'Charakter-Auswahl fehlgeschlagen: %s',
+    char_deleted             = 'Charakter geloescht: %s (citizenid=%s).',
+    char_auto_created        = 'Auto-Charakter fuer User %s erstellt (Phase 1 Fallback).',
+    char_auto_selected       = 'Auto-Charakter-Auswahl: %s %s (Slot %d).',
 
     -- ============================================================
     --  MONEY

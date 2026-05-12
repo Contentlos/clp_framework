@@ -65,12 +65,26 @@ Config.LogDiscordHook = nil   -- nil oder Webhook-URL; in Phase 3 wird Logger au
 
 -- ============================================================
 --  PHASE-0-MODE
---  Solange Player/Money/Jobs noch Stubs sind, läuft das Framework
---  im "Skeleton-Mode": ESX-Bridge gibt ein leeres Shared-Object,
---  Spieler werden NICHT geladen, keine DB-Charakter-Auswahl.
---  Wird in Phase 1 auf false gestellt.
+--  In Phase 0 lief das Framework im SkeletonMode: keine DB-Charakter-Daten,
+--  Spieler wurden nur "gerippt" damit Bridges nicht crashen.
+--  In Phase 1+ ist das aus — Spieler werden aus clp_characters geladen.
 -- ============================================================
-Config.SkeletonMode = true
+Config.SkeletonMode = false
+
+-- ============================================================
+--  PHASE-1-MODE  (Auto-Char-Select bis UI in Phase 4 existiert)
+--
+--  Wenn true:  Joinende Spieler ohne Charakter bekommen automatisch einen
+--              "Default-Charakter" (siehe Config.DefaultChar*) und werden
+--              direkt geladen. Spieler mit 1+ Charakteren bekommen den
+--              zuletzt gespielten (last_seen DESC).
+--  Wenn false: Server sendet CharList-Event an Client und wartet auf
+--              CharSelect/CharCreate vom Client (Char-Select-UI — Phase 4).
+-- ============================================================
+Config.AutoCharSelect      = true
+Config.DefaultCharFirstname = 'Max'
+Config.DefaultCharLastname  = 'Mustermann'
+Config.DefaultCharGender    = 'm'   -- 'm' | 'f' | 'd'
 
 -- ============================================================
 --  DEFAULTS — werden in Phase 1+ in DB-Seeds verschoben
