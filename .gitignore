@@ -1,0 +1,32 @@
+## clp_framework — .gitignore
+
+# IDE / Editor
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Lokale Konfig / Secrets (NIEMALS einchecken)
+*.local.lua
+*.local.json
+secrets.lua
+.env
+.env.*
+
+# Build / temporäre Artefakte
+*.bak
+*.tmp
+*.log
+*.lock
+*.orig
+*.rej
+
+# OS-Junk
+desktop.ini
+
+# FiveM-Cache (falls jemand den Resource lokal in eine Server-Root committet)
+cache/

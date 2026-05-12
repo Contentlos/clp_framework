@@ -1,0 +1,47 @@
+/* clp_framework — UI Stylesheet (Phase 0: minimal)
+   Voller Look-and-Feel mit Glassmorphismus, Pulsing-Buttons, Theme-Vars
+   kommt in Phase 4. Hier nur Basis-Reset + Stack-Layout.
+*/
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+    color: #fff;
+    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+    pointer-events: none;
+}
+
+#clp-root {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+}
+
+.clp-stack {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    pointer-events: none;
+}
+
+.clp-stack[data-anchor="top-right"]    { top: 0; right: 0; }
+.clp-stack[data-anchor="top-left"]     { top: 0; left: 0; }
+.clp-stack[data-anchor="bottom-center"]{ bottom: 24px; left: 50%; transform: translateX(-50%); }
+.clp-stack[data-anchor="right"]        { top: 50%; right: 0; transform: translateY(-50%); }
+.clp-stack[data-anchor="center"]       { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+/* Theme-Variablen (Phase 4 wird via /clpsettings überschreibbar) */
+:root {
+    --clp-accent: #00FFB4;
+    --clp-bg:     rgba(20, 22, 26, 0.85);
+    --clp-bg-strong: rgba(15, 16, 19, 0.95);
+    --clp-border: rgba(255, 255, 255, 0.08);
+    --clp-text:   #ffffff;
+    --clp-text-dim: rgba(255, 255, 255, 0.6);
+}

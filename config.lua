@@ -1,0 +1,79 @@
+--[[
+    clp_framework — Bootstrap-Konfiguration
+
+    Diese Datei enthält nur Werte, die BEIM START vorhanden sein müssen.
+    Alles andere (Jobs, Items, Doors, Vehicles-Defaults) lebt in der Datenbank
+    bzw. im jeweiligen Modul-Config und ist später in-game editierbar
+    (kommt in Phase 3+).
+
+    Konvention: Werte hier dürfen vom Server-Owner überschrieben werden;
+    der Code im Framework liest ausschließlich über die Config-Tabelle.
+]]
+
+Config = Config or {}
+
+-- ============================================================
+--  ALLGEMEIN
+-- ============================================================
+Config.Locale          = 'de'      -- Aktuell nur 'de' implementiert. (i18n bewusst weggelassen.)
+Config.Debug           = false     -- true = ausführliche Logs auf der Server-Konsole
+Config.AutoApplySchema = true      -- false = Schema nicht automatisch anwenden (manuell via SQL)
+
+-- ============================================================
+--  IDENTIFIKATION
+--  Reihenfolge bestimmt welcher Identifier als "primary" gilt.
+--  Erster verfügbarer wird genommen. license / license2 sind robust.
+-- ============================================================
+Config.PrimaryIdentifier = 'license'  -- 'license' | 'license2' | 'steam' | 'discord' | 'fivem' | 'xbl'
+
+-- ============================================================
+--  CHARAKTER / ACCOUNT
+-- ============================================================
+Config.MaxCharacters    = 3              -- Max Charaktere pro User
+Config.AutoSaveInterval = 5 * 60 * 1000  -- 5 Min — alle Online-Charaktere auf DB persistieren
+Config.StartCash        = 500            -- Startgeld bei neuem Charakter
+Config.StartBank        = 5000           -- Start-Bank
+Config.StartBlackMoney  = 0
+
+-- ============================================================
+--  ADMIN-GRUPPEN
+--  Akzeptierte Gruppen-Strings aus der `users.group`-Spalte.
+--  Wird bei Resource-Start in den Permissions-Cache geladen.
+-- ============================================================
+Config.AdminGroups = { 'admin', 'superadmin', 'owner' }
+
+-- Zusätzlich kann ACE genutzt werden (z.B. via 'command.clpadmin')
+Config.AdminAceCheck = nil  -- nil = aus
+
+-- ============================================================
+--  ESX-BRIDGE
+-- ============================================================
+Config.EnableEsxBridge   = true   -- ESX-kompatible Exports + xPlayer-Shape
+Config.EmitEsxEvents     = true   -- Fire 'esx:playerLoaded' / 'esx:setJob' / 'esx:setAccountMoney' etc.
+Config.EsxSharedObjName  = 'es_extended' -- Export-Resource-Name für getSharedObject() — Standard-ESX
+                                          -- (Resource muss NICHT existieren; das Framework registriert
+                                          --  den Export selber. Wir matchen den Standard-Namen damit
+                                          --  Resources wie clp_gmenu ohne Änderung funktionieren.)
+
+-- ============================================================
+--  LOGGING
+-- ============================================================
+Config.LogToConsole   = true
+Config.LogToFile      = true
+Config.LogFilePath    = 'logs/clp_framework.log'  -- relativ zur Resource (logs/-Ordner wird erstellt)
+Config.LogDiscordHook = nil   -- nil oder Webhook-URL; in Phase 3 wird Logger ausgebaut
+
+-- ============================================================
+--  PHASE-0-MODE
+--  Solange Player/Money/Jobs noch Stubs sind, läuft das Framework
+--  im "Skeleton-Mode": ESX-Bridge gibt ein leeres Shared-Object,
+--  Spieler werden NICHT geladen, keine DB-Charakter-Auswahl.
+--  Wird in Phase 1 auf false gestellt.
+-- ============================================================
+Config.SkeletonMode = true
+
+-- ============================================================
+--  DEFAULTS — werden in Phase 1+ in DB-Seeds verschoben
+-- ============================================================
+Config.DefaultJob       = 'unemployed'
+Config.DefaultJobGrade  = 0
