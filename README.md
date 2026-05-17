@@ -12,15 +12,21 @@
 | 0 | Skeleton, Core-Loader, DB-Schema, Identity, ESX-Bridge | erledigt |
 | 1 | Player-Persistence, User-Upsert, Char-Lifecycle, Auto-Save | erledigt |
 | 2 | Jobs/Grades-Registry, Default-Seed, Salary-Tick, Admin-Commands | erledigt |
-| **3** | Hooks-System, Logger (Discord-Webhook, File, Levels), Notify-Erweiterung | aktuell |
-| 4 | `modules/ui` voll (Notify / Menu / Progress / Input — eigene NUI) | ⏳ geplant |
+| 3 | Hooks-System, Logger (Discord-Webhook, File, Levels), Notify-Erweiterung | erledigt |
+| **4** | `modules/ui` voll (Notify / Menu / Progress / Input / CharSelect NUI) | aktuell |
 | 5 | `modules/inventory` voll (Items, Slots, D&D, Hotbar, Drops, Trade) | ⏳ geplant |
 | 6 | `modules/vehicles` voll (Spawn, Garage, Keys, Persistence) | ⏳ geplant |
 | 7 | `modules/doors` voll (Registry, Auth, Admin-Editor) | ⏳ geplant |
 | 8 | `modules/phone` Stub für späteres Phone-Resource | ⏳ geplant |
 | 9 | Doku, Migration-Guide ESX→CLP, Beispiel-Resource | ⏳ geplant |
 
-> **Aktuell: Phase 3 — Hooks / Logger / Notify.** Es gibt jetzt ein generisches
+> **Aktuell: Phase 4 — UI-Modul voll + Char-Select-NUI.** Vanilla HTML/CSS/JS
+> NUI mit Glassmorphism-Theme: animierte Toast-**Notify** (info/success/warning/error),
+> Stack-**Menu** mit Pfeiltasten/Enter/Esc-Navigation, **Progressbar** mit optionalem
+> Cancel via X, **Input-Modal** mit beliebig vielen Feldern + Async-Return,
+> Vollbild-**Char-Select** mit Slot-Cards, Create-Modal, Loeschen-Confirm + Heaven-Cam.
+> `Config.AutoCharSelect = false` ist jetzt Default — NUI laeuft beim Connect.
+> **Vorherige Status:** Phase 3 Es gibt jetzt ein generisches
 > Hook-System (`CLP.Hooks:Register/Fire`) mit Cancel-Faehigkeit (`before:*` Hooks
 > koennen Aktionen abbrechen). Das Logger-Modul kann jetzt strukturierte Levels
 > (debug/info/warn/error/audit), schreibt in eine optionale Logdatei und postet
@@ -323,11 +329,50 @@ CLP.OnCharList(function(data)          -- data = { chars = {...}, maxChars = N }
 end)
 AddEventHandler('clp:client:charSelected', function(data) ... end)
 
--- UI
+-- UI (Phase 4 — voll implementiert)
 CLP.UI.Notify('Hallo Welt', 'success', 4000)
-CLP.UI.OpenMenu({ title = 'Auswahl', items = { … } })
-CLP.UI.Progress({ label = 'Lockpicking', duration = 5000 }, function(done) … end)
-local input = CLP.UI.Input({ title = 'Plate' })
+
+-- Menu (Stack-faehig + Pfeil/Enter/Esc-Navigation in NUI)
+local id = CLP.UI.OpenMenu({
+    title    = 'Hauptmenue',
+    subtitle = 'Subline',
+    items = {
+        { label = 'Profil',     icon = 'P', onSelect = function() print('profil') end },
+        { label = 'Inventar',   icon = 'I', description = '15/30',
+          onSelect = function() print('inv') end },
+        { label = 'Gesperrt',   disabled = true },
+    },
+    onClose = function() print('menu zu') end,
+})
+CLP.UI.CloseMenu(id)
+CLP.UI.CloseAllMenus()
+
+-- Progress (mit Cancel via X + Movement-Lock)
+CLP.UI.Progress({
+    label = 'Lockpicking',
+    duration = 5000,
+    canCancel = true,
+    disableMovement = true,
+}, function(success)
+    if success then print('done') else print('abort') end
+end)
+
+-- Input (mehrere Felder, gibt Tabelle oder nil zurueck)
+local values = CLP.UI.Input({
+    title = 'Spieler-Daten',
+    fields = {
+        { name='firstname', label='Vorname', type='text', placeholder='Max', maxLength=32 },
+        { name='alter',     label='Alter',   type='number' },
+        { name='gender',    label='Geschlecht', type='select',
+          options = { { value='m', label='Maennlich' }, { value='f', label='Weiblich' } } },
+    },
+})
+if values then print(values.firstname, values.alter) end
+
+-- Char-Select (wird automatisch bei Connect geoeffnet wenn AutoCharSelect=false)
+CLP.UI.ShowCharSelect(chars, maxChars)
+CLP.UI.HideCharSelect()
+CLP.UI.IsCharSelectOpen()
 ```
 
 ### ESX-Bridge (für Drittanbieter-Resources, z.B. clp_gmenu)

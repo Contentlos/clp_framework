@@ -79,16 +79,17 @@ Config.LogDiscordAudit   = false                -- alle audit() ebenfalls posten
 Config.SkeletonMode = false
 
 -- ============================================================
---  PHASE-1-MODE  (Auto-Char-Select bis UI in Phase 4 existiert)
+--  CHARAKTER-AUSWAHL  (Phase 4 NUI ist scharfgeschaltet)
 --
 --  Wenn true:  Joinende Spieler ohne Charakter bekommen automatisch einen
 --              "Default-Charakter" (siehe Config.DefaultChar*) und werden
 --              direkt geladen. Spieler mit 1+ Charakteren bekommen den
---              zuletzt gespielten (last_seen DESC).
---  Wenn false: Server sendet CharList-Event an Client und wartet auf
---              CharSelect/CharCreate vom Client (Char-Select-UI — Phase 4).
+--              zuletzt gespielten (last_seen DESC). Schnell-Test-Modus.
+--  Wenn false: Server sendet CharList-Event an Client, NUI oeffnet die
+--              Vollbild-Char-Auswahl, Spieler waehlt/erstellt/loescht
+--              seine Charaktere. (Phase-4-NUI ab Version 0.5.0)
 -- ============================================================
-Config.AutoCharSelect      = true
+Config.AutoCharSelect      = false
 Config.DefaultCharFirstname = 'Max'
 Config.DefaultCharLastname  = 'Mustermann'
 Config.DefaultCharGender    = 'm'   -- 'm' | 'f' | 'd'

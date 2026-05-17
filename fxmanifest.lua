@@ -26,7 +26,7 @@ use_experimental_fxv2_oal 'yes'
 
 name 'clp_framework'
 author 'Contentlos / CLP'
-version '0.4.0-phase3'
+version '0.5.0-phase4'
 description 'CLP-Framework Core (Player, Money, Jobs, Inventory, Vehicles, Doors, Phone-Stub) mit ESX-Bridge'
 repository 'https://github.com/Contentlos/clp_framework'
 
@@ -105,11 +105,12 @@ client_scripts {
     'client/events.lua',
     'client/commands.lua',
 
-    -- UI-Modul (NUI-Bridge: Notify, Menu, Progress, Input)
+    -- UI-Modul (NUI-Bridge: Notify, Menu, Progress, Input, CharSelect)
     'modules/ui/client/notify.lua',
     'modules/ui/client/menu.lua',
     'modules/ui/client/progress.lua',
     'modules/ui/client/input.lua',
+    'modules/ui/client/charselect.lua',
 
     -- Sub-Module (Stub-Files in Phase 0)
     'modules/inventory/client/main.lua',

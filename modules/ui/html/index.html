@@ -8,14 +8,64 @@
 </head>
 <body>
     <!--
-        clp_framework UI-Container (Phase 0: leer / Skeleton).
-        In Phase 4 werden hier Notify / Menu / Progressbar / Input gerendert.
+        clp_framework UI-Container (Phase 4)
+        Vier Stack-Layer + Modal-Layer:
+          notify-stack    : Toast-Notifications (top-right)
+          progress-stack  : Aktive Progressbar (bottom-center)
+          menu-stack      : Open-Menu-Liste (right)
+          input-stack     : Input-Dialog modal (center)
+          charselect      : Vollbild-Charakterauswahl
     -->
     <div id="clp-root">
-        <div id="clp-notify-stack" class="clp-stack" data-anchor="top-right"></div>
+        <div id="clp-notify-stack"   class="clp-stack" data-anchor="top-right"></div>
         <div id="clp-progress-stack" class="clp-stack" data-anchor="bottom-center"></div>
-        <div id="clp-menu-stack" class="clp-stack" data-anchor="right"></div>
-        <div id="clp-input-stack" class="clp-stack" data-anchor="center"></div>
+        <div id="clp-menu-stack"     class="clp-stack" data-anchor="right"></div>
+        <div id="clp-input-stack"    class="clp-stack" data-anchor="center"></div>
+
+        <!-- Char-Select Vollbild-Modal -->
+        <div id="clp-charselect" class="clp-charselect hidden">
+            <div class="clp-charselect__inner">
+                <div class="clp-charselect__header">
+                    <h1 class="clp-charselect__title">CLP-Framework</h1>
+                    <p class="clp-charselect__subtitle">Charakter waehlen</p>
+                </div>
+                <div id="clp-charselect-list" class="clp-charselect__list"></div>
+                <div class="clp-charselect__footer">
+                    <button class="clp-btn clp-btn--ghost" id="clp-charselect-newbtn">+ Neuen Charakter erstellen</button>
+                </div>
+            </div>
+
+            <!-- Modal: neuen Char anlegen -->
+            <div id="clp-charcreate" class="clp-charcreate hidden">
+                <div class="clp-charcreate__card">
+                    <h2>Neuer Charakter</h2>
+                    <label>
+                        <span>Vorname</span>
+                        <input id="clp-cc-firstname" type="text" maxlength="32" placeholder="Max" autocomplete="off">
+                    </label>
+                    <label>
+                        <span>Nachname</span>
+                        <input id="clp-cc-lastname" type="text" maxlength="32" placeholder="Mustermann" autocomplete="off">
+                    </label>
+                    <label>
+                        <span>Geschlecht</span>
+                        <select id="clp-cc-gender">
+                            <option value="m">Maennlich</option>
+                            <option value="f">Weiblich</option>
+                            <option value="d">Divers</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span>Geburtstag (optional)</span>
+                        <input id="clp-cc-birthdate" type="date">
+                    </label>
+                    <div class="clp-charcreate__row">
+                        <button class="clp-btn clp-btn--ghost" id="clp-cc-cancel">Abbrechen</button>
+                        <button class="clp-btn clp-btn--primary" id="clp-cc-submit">Charakter erstellen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>

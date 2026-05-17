@@ -1,21 +1,21 @@
 --[[
-    clp_framework — Notify (Client)
+    clp_framework — Notify (Client, Phase 4)
 
-    Phase 0: nimmt einen Notify-Aufruf entgegen und schickt ihn als NUI-Message
-    an html/script.js. In Phase 4 kommen Typen / Sounds / Animationen dazu.
+    Server-/Client-Notify Bridge zur NUI. Server sendet CLP.Events.UINotify
+    (Tabelle: { message, type, duration }), Client rendert in #clp-notify-stack.
 ]]
 
 CLP.UI = CLP.UI or {}
 
---- Zeigt eine Notification.
+--- Zeigt eine Notification lokal an.
 --- @param message string
---- @param type string?       'info' (default) | 'success' | 'warning' | 'error'
+--- @param ntype string?      'info' (default) | 'success' | 'warning' | 'error'
 --- @param duration number?   in ms (default 4000)
-function CLP.UI.Notify(message, type, duration)
+function CLP.UI.Notify(message, ntype, duration)
     SendNUIMessage({
         action   = 'notify',
         message  = tostring(message or ''),
-        type     = type or 'info',
+        type     = ntype or 'info',
         duration = tonumber(duration) or 4000,
     })
 end
@@ -29,7 +29,7 @@ RegisterNetEvent(CLP.Events.UINotify, function(data)
     end
 end)
 
--- ESX-Kompat: Resource lauschen häufig auf 'esx:showNotification'
-RegisterNetEvent('esx:showNotification', function(message, type, duration)
-    CLP.UI.Notify(message, type, duration)
+-- ESX-Kompat: Resource lauschen haeufig auf 'esx:showNotification'
+RegisterNetEvent('esx:showNotification', function(message, ntype, duration)
+    CLP.UI.Notify(message, ntype, duration)
 end)
