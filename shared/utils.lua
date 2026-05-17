@@ -122,9 +122,17 @@ end
 --    -> wir prüfen DB auf Eindeutigkeit beim Erstellen.
 -- ============================================================
 local CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' -- ohne 0/O/1/I/L für Lesbarkeit
+
+-- Lua 5.4: math.randomseed verlangt Integer. Einmaliger Seed beim Laden
+-- reicht voellig fuer Citizen-IDs (DB-Eindeutigkeitscheck folgt sowieso).
+do
+    local seed = math.floor(os.time())
+    if GetGameTimer then seed = seed + math.floor(GetGameTimer()) end
+    math.randomseed(seed)
+end
+
 function U.generateCitizenId(length)
     length = length or 8
-    math.randomseed((GetGameTimer and GetGameTimer() or os.time()) + (math.random() * 100000))
     local out = {}
     for i = 1, length do
         local idx = math.random(1, #CHARS)
