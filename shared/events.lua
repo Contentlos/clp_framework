@@ -1,0 +1,68 @@
+--[[
+    clp_framework — Event-Konstanten
+
+    Zentrale Definition aller Event-Namen die das Framework auf NetEvent /
+    AddEventHandler-Level feuert. Andere Resources sollen NUR diese Konstanten
+    nutzen, NIE Strings hartcoden, damit Umbenennungen ein-Stellen-Änderungen sind.
+
+    Konvention für Event-Namen:
+        clp:<bereich>:<aktion>
+    Beispiele:
+        clp:player:loaded
+        clp:player:dropped
+        clp:player:save
+        clp:money:changed
+        clp:job:changed
+]]
+
+local E = {
+    -- Player-Lifecycle
+    PlayerConnecting   = 'clp:player:connecting',  -- S: vor Loading (preCheck, identifiers)
+    PlayerLoading      = 'clp:player:loading',     -- S→C: send Spinner / Char-Select
+    PlayerLoaded       = 'clp:player:loaded',      -- S→C: alle Daten da
+    PlayerDropped      = 'clp:player:dropped',     -- S: nach disconnect
+    PlayerSpawned      = 'clp:player:spawned',     -- C→S: Ped fertig im Spiel
+    PlayerSwitchedChar = 'clp:player:switchedChar',-- bei Charakterwechsel ohne Reconnect
+
+    -- Charakter-Lifecycle (Phase 1+; UI dazu kommt in Phase 4)
+    CharList           = 'clp:char:list',          -- S→C: { chars = {...}, maxChars = N }
+    CharRequestList    = 'clp:char:requestList',   -- C→S: "gib mir meine Charaktere"
+    CharCreate         = 'clp:char:create',        -- C→S: { firstname, lastname, gender, ... }
+    CharCreated        = 'clp:char:created',       -- S→C: { citizenid, slot, ok, err? }
+    CharSelect         = 'clp:char:select',        -- C→S: { citizenid }
+    CharSelected       = 'clp:char:selected',      -- S→C: bestaetigt, danach folgt PlayerLoaded
+    CharDelete         = 'clp:char:delete',        -- C→S: { citizenid }  (soft-delete)
+    CharDeleted        = 'clp:char:deleted',       -- S→C: { citizenid, ok, err? }
+
+    -- Money
+    MoneyChanged       = 'clp:money:changed',      -- C/S: { account, oldValue, newValue, reason }
+    MoneyAdded         = 'clp:money:added',        -- nur Add-Events (für Analytics)
+    MoneyRemoved       = 'clp:money:removed',
+
+    -- Jobs
+    JobChanged         = 'clp:job:changed',        -- { old, new, grade }
+    JobDuty            = 'clp:job:duty',           -- { onDuty: bool }
+
+    -- Inventory (Phase 5+)
+    InvUpdated         = 'clp:inv:updated',
+    InvItemUsed        = 'clp:inv:itemUsed',
+
+    -- Vehicles (Phase 6+)
+    VehicleSpawned     = 'clp:veh:spawned',
+    VehicleStored      = 'clp:veh:stored',
+
+    -- Doors (Phase 7+)
+    DoorToggled        = 'clp:door:toggled',
+
+    -- UI / Notify (Phase 3; UI-NUI in Phase 4)
+    UINotify           = 'clp:ui:notify',          -- S->C: { message, type, duration }
+    UIProgressStart    = 'clp:ui:progressStart',   -- S->C: { label, duration, key }
+    UIProgressCancel   = 'clp:ui:progressCancel',  -- S->C: { key }
+    HooksCancelled     = 'clp:hooks:cancelled',    -- internal: hook chain abort marker
+
+    -- Sicherheits-Events
+    SecurityViolation  = 'clp:security:violation', -- S-only: { src, type, payload }
+}
+
+CLP.Events = E
+CLP.RegisterModule('Events', E)
