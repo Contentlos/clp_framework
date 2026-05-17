@@ -26,7 +26,7 @@ use_experimental_fxv2_oal 'yes'
 
 name 'clp_framework'
 author 'Contentlos / CLP'
-version '0.5.0-phase4'
+version '0.5.1-sidecar'
 description 'CLP-Framework Core (Player, Money, Jobs, Inventory, Vehicles, Doors, Phone-Stub) mit ESX-Bridge'
 repository 'https://github.com/Contentlos/clp_framework'
 

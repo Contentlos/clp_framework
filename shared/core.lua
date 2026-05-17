@@ -13,7 +13,7 @@
 -- ============================================================
 CLP = CLP or {
     -- Versions-Info
-    Version        = '0.5.0-phase4',
+    Version        = '0.5.1-sidecar',
     Phase          = 4,
     ResourceName   = GetCurrentResourceName(),
 

@@ -13,14 +13,26 @@
 | 1 | Player-Persistence, User-Upsert, Char-Lifecycle, Auto-Save | erledigt |
 | 2 | Jobs/Grades-Registry, Default-Seed, Salary-Tick, Admin-Commands | erledigt |
 | 3 | Hooks-System, Logger (Discord-Webhook, File, Levels), Notify-Erweiterung | erledigt |
-| **4** | `modules/ui` voll (Notify / Menu / Progress / Input / CharSelect NUI) | aktuell |
+| 4 | `modules/ui` voll (Notify / Menu / Progress / Input / CharSelect NUI) | erledigt |
+| **4.1** | Sidecar-Mode Default (`SkeletonMode=true`, ESX-Bridge & Emit aus) | aktuell |
 | 5 | `modules/inventory` voll (Items, Slots, D&D, Hotbar, Drops, Trade) | ⏳ geplant |
 | 6 | `modules/vehicles` voll (Spawn, Garage, Keys, Persistence) | ⏳ geplant |
 | 7 | `modules/doors` voll (Registry, Auth, Admin-Editor) | ⏳ geplant |
 | 8 | `modules/phone` Stub für späteres Phone-Resource | ⏳ geplant |
 | 9 | Doku, Migration-Guide ESX→CLP, Beispiel-Resource | ⏳ geplant |
 
-> **Aktuell: Phase 4 — UI-Modul voll + Char-Select-NUI.** Vanilla HTML/CSS/JS
+> **Aktuell: v0.5.1 — Sidecar-Mode ist Default.**
+> clp_framework laeuft ab v0.5.1 standardmaessig im **Sidecar-Mode**: das
+> heisst `Config.SkeletonMode = true`, `Config.EmitEsxEvents = false`,
+> `Config.EnableEsxBridge = false`. clp_framework laedt **keine** Spieler,
+> emittiert **keine** ESX-Events und liefert **kein** xPlayer-Objekt — das
+> macht es_extended weiter selbst. clp_framework liefert in diesem Modus nur
+> noch UI (`CLP.UI.Notify/OpenMenu/Progress/Input`), Hooks, Logger
+> (inkl. Discord-Webhook) und ein paar Admin-Commands. Wer den vollen
+> Player-Lifecycle, Char-Select-NUI und ESX-Drop-In moechte, setzt die drei
+> Configs zurueck auf `true`/`false`/`true` und deinstalliert es_extended.
+>
+> **Vorherige Status (Phase 4):** UI-Modul voll + Char-Select-NUI. Vanilla HTML/CSS/JS
 > NUI mit Glassmorphism-Theme: animierte Toast-**Notify** (info/success/warning/error),
 > Stack-**Menu** mit Pfeiltasten/Enter/Esc-Navigation, **Progressbar** mit optionalem
 > Cancel via X, **Input-Modal** mit beliebig vielen Feldern + Async-Return,

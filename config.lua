@@ -47,9 +47,18 @@ Config.AdminAceCheck = nil  -- nil = aus
 
 -- ============================================================
 --  ESX-BRIDGE
+--
+--  SIDECAR-MODE (Default ab v0.5.1):
+--    Wenn du clp_framework PARALLEL zu es_extended laeufst (ESX bleibt das
+--    Framework, clp_framework liefert nur UI/Hooks/Logger), MUSS beides hier
+--    auf false stehen, sonst kommen sich beide gegenseitig in die Quere.
+--
+--  DROP-IN-MODE (zukuenftig, wenn clp_framework es_extended ersetzt):
+--    Beides auf true und es_extended deinstallieren. clp_framework liefert
+--    dann den xPlayer + alle ESX-Events fuer kompatible Resources.
 -- ============================================================
-Config.EnableEsxBridge   = true   -- ESX-kompatible Exports + xPlayer-Shape
-Config.EmitEsxEvents     = true   -- Fire 'esx:playerLoaded' / 'esx:setJob' / 'esx:setAccountMoney' etc.
+Config.EnableEsxBridge   = false  -- ESX-kompatible Exports + xPlayer-Shape (Drop-In-Mode)
+Config.EmitEsxEvents     = false  -- Fire 'esx:playerLoaded' / 'esx:onPlayerSpawn' etc. (Drop-In-Mode)
 Config.EsxSharedObjName  = 'es_extended' -- Export-Resource-Name für getSharedObject() — Standard-ESX
                                           -- (Resource muss NICHT existieren; das Framework registriert
                                           --  den Export selber. Wir matchen den Standard-Namen damit
@@ -71,15 +80,24 @@ Config.LogDiscordLevels  = { 'error', 'warn' }  -- welche Levels gesendet werden
 Config.LogDiscordAudit   = false                -- alle audit() ebenfalls posten
 
 -- ============================================================
---  PHASE-0-MODE
---  In Phase 0 lief das Framework im SkeletonMode: keine DB-Charakter-Daten,
---  Spieler wurden nur "gerippt" damit Bridges nicht crashen.
---  In Phase 1+ ist das aus — Spieler werden aus clp_characters geladen.
+--  PLAYER-LIFECYCLE
+--
+--  SkeletonMode = true:
+--    clp_framework lädt KEINEN Spieler aus clp_characters, macht KEIN
+--    AttachCharacter, schreibt KEIN clp_users/clp_characters. Das brauchst
+--    du im Sidecar-Mode (es_extended verwaltet die Spieler).
+--    UI/Hooks/Logger laufen aber trotzdem.
+--
+--  SkeletonMode = false:
+--    Voller Player-Lifecycle aus clp_users/clp_characters mit AttachCharacter,
+--    Money/Job-Push an Client, AutoSave-Loop etc. (Drop-In-Mode oder eigener
+--    Server ohne ESX).
 -- ============================================================
-Config.SkeletonMode = false
+Config.SkeletonMode = true   -- SIDECAR-MODE (Default ab v0.5.1)
 
 -- ============================================================
 --  CHARAKTER-AUSWAHL  (Phase 4 NUI ist scharfgeschaltet)
+--  Nur relevant wenn Config.SkeletonMode = false (sonst egal).
 --
 --  Wenn true:  Joinende Spieler ohne Charakter bekommen automatisch einen
 --              "Default-Charakter" (siehe Config.DefaultChar*) und werden
@@ -89,7 +107,7 @@ Config.SkeletonMode = false
 --              Vollbild-Char-Auswahl, Spieler waehlt/erstellt/loescht
 --              seine Charaktere. (Phase-4-NUI ab Version 0.5.0)
 -- ============================================================
-Config.AutoCharSelect      = false
+Config.AutoCharSelect      = true
 Config.DefaultCharFirstname = 'Max'
 Config.DefaultCharLastname  = 'Mustermann'
 Config.DefaultCharGender    = 'm'   -- 'm' | 'f' | 'd'
