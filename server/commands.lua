@@ -229,3 +229,36 @@ RegisterCommand('clpreloadjobs', function(source, args, rawCommand)
     CLP.Jobs:Reload()
     reply(source, 'Jobs-Registry neu geladen.')
 end, true)
+
+-- ============================================================
+--  /clphooks   (Admin — Hooks-Diagnose, Phase 3)
+-- ============================================================
+RegisterCommand('clphooks', function(source, args, rawCommand)
+    if not requireAdmin(source) then return end
+    if not CLP.Hooks then
+        reply(source, 'Hooks-System nicht geladen.', '^1')
+        return
+    end
+    local list = CLP.Hooks:List()
+    local names = {}
+    for k in pairs(list) do names[#names + 1] = k end
+    table.sort(names)
+    reply(source, ('Registrierte Hooks (%d):'):format(#names))
+    for _, name in ipairs(names) do
+        reply(source, ('  %s — %d Handler'):format(name, list[name]))
+    end
+end, true)
+
+-- ============================================================
+--  /clpannounce <msg>  (Admin — Broadcast-Notify, Phase 3)
+-- ============================================================
+RegisterCommand('clpannounce', function(source, args, rawCommand)
+    if not requireAdmin(source) then return end
+    if #args == 0 then
+        reply(source, 'Verwendung: /clpannounce <message>', '^3')
+        return
+    end
+    local msg = table.concat(args, ' ')
+    CLP.NotifyAll(msg, 'warning', 8000)
+    reply(source, ('Broadcast an alle: "%s"'):format(msg))
+end, true)

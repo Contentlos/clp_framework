@@ -56,12 +56,19 @@ Config.EsxSharedObjName  = 'es_extended' -- Export-Resource-Name für getSharedO
                                           --  Resources wie clp_gmenu ohne Änderung funktionieren.)
 
 -- ============================================================
---  LOGGING
+--  LOGGING  (Phase 3)
 -- ============================================================
-Config.LogToConsole   = true
-Config.LogToFile      = true
-Config.LogFilePath    = 'logs/clp_framework.log'  -- relativ zur Resource (logs/-Ordner wird erstellt)
-Config.LogDiscordHook = nil   -- nil oder Webhook-URL; in Phase 3 wird Logger ausgebaut
+Config.LogToConsole     = true
+Config.LogToFile        = true
+Config.LogFilePath      = 'logs/clp_framework.log'  -- relativ zur Resource (logs/-Ordner wird erstellt)
+Config.LogLevel         = 'info'  -- 'debug' | 'info' | 'warn' | 'error'  (debug muss separat aktiv sein)
+
+-- Discord-Webhook (optional). Wenn gesetzt, werden Logs der konfigurierten Levels
+-- als Embed gepostet. URL siehe Discord -> Channel-Einstellungen -> Integrations.
+Config.LogDiscordHook   = nil   -- z.B. 'https://discord.com/api/webhooks/...'
+Config.LogDiscordUsername = 'CLP-Framework'
+Config.LogDiscordLevels  = { 'error', 'warn' }  -- welche Levels gesendet werden
+Config.LogDiscordAudit   = false                -- alle audit() ebenfalls posten
 
 -- ============================================================
 --  PHASE-0-MODE

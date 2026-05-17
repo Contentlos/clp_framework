@@ -119,6 +119,10 @@ function Player:AttachCharacter(row)
     self.attached   = true
     self.dirty      = false
     self.lastSaveAt = CLP.Util.nowMs()
+
+    if CLP.Hooks then
+        CLP.Hooks:Fire('after:char:attach', { src = self.source, citizenid = self.citizenid })
+    end
     return true
 end
 

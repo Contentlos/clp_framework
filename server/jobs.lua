@@ -148,6 +148,12 @@ function Jobs:SetJob(src, name, grade, reason)
     end
 
     local old = p:GetJob()
+
+    if CLP.Hooks then
+        local ok = CLP.Hooks:Fire('before:job:change', { src = src, from = old, to = { name = job.name, grade = g.grade }, reason = reason })
+        if ok == false then return false, 'cancelled' end
+    end
+
     p.job.name        = job.name
     p.job.label       = job.label
     p.job.grade       = g.grade
@@ -166,6 +172,9 @@ function Jobs:SetJob(src, name, grade, reason)
     if p.citizenid and CLP.Log.audit then
         CLP.Log.audit(p.citizenid, 'job_change', { from = old, to = p:GetJob(), reason = reason }, 'system')
     end
+    if CLP.Hooks then
+        CLP.Hooks:Fire('after:job:change', { src = src, from = old, to = p:GetJob(), reason = reason })
+    end
     return true
 end
 
@@ -175,10 +184,14 @@ end
 function Jobs:SetDuty(src, onDuty)
     local p = CLP.GetPlayer(src)
     if not p then return false end
+    local prev = p.job.on_duty
     p.job.on_duty = (onDuty == true)
     p:MarkDirty()
     TriggerEvent(CLP.Events.JobDuty, src, p.job.on_duty)
     TriggerClientEvent(CLP.Events.JobDuty, src, p.job.on_duty)
+    if CLP.Hooks then
+        CLP.Hooks:Fire('after:job:duty', { src = src, on_duty = p.job.on_duty, was = prev })
+    end
     return true
 end
 

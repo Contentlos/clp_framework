@@ -29,6 +29,10 @@ function Money:Add(src, account, amount, reason)
     account = account or 'cash'
     amount  = tonumber(amount) or 0
     if amount <= 0 then return false end
+    if CLP.Hooks then
+        local ok = CLP.Hooks:Fire('before:money:add', { src = src, account = account, amount = amount, reason = reason })
+        if ok == false then return false, 'cancelled' end
+    end
     local old = p:GetMoney(account)
     if not p:AddMoney(account, amount, reason) then return false end
     local new = p:GetMoney(account)
@@ -37,6 +41,9 @@ function Money:Add(src, account, amount, reason)
     TriggerClientEvent(CLP.Events.MoneyChanged, src, account, old, new, reason)
     if Config.EmitEsxEvents and (account == 'bank' or account == 'black_money') then
         TriggerClientEvent('esx:setAccountMoney', src, { name = account, money = new })
+    end
+    if CLP.Hooks then
+        CLP.Hooks:Fire('after:money:add', { src = src, account = account, amount = amount, old = old, new = new, reason = reason })
     end
     return true
 end
@@ -47,6 +54,10 @@ function Money:Remove(src, account, amount, reason)
     account = account or 'cash'
     amount  = tonumber(amount) or 0
     if amount <= 0 then return false end
+    if CLP.Hooks then
+        local ok = CLP.Hooks:Fire('before:money:remove', { src = src, account = account, amount = amount, reason = reason })
+        if ok == false then return false, 'cancelled' end
+    end
     local old = p:GetMoney(account)
     if not p:RemoveMoney(account, amount, reason) then return false end
     local new = p:GetMoney(account)
@@ -55,6 +66,9 @@ function Money:Remove(src, account, amount, reason)
     TriggerClientEvent(CLP.Events.MoneyChanged, src, account, old, new, reason)
     if Config.EmitEsxEvents and (account == 'bank' or account == 'black_money') then
         TriggerClientEvent('esx:setAccountMoney', src, { name = account, money = new })
+    end
+    if CLP.Hooks then
+        CLP.Hooks:Fire('after:money:remove', { src = src, account = account, amount = amount, old = old, new = new, reason = reason })
     end
     return true
 end

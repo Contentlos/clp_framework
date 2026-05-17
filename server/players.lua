@@ -117,6 +117,9 @@ function CLP.AttachCharacter(src, row)
     end
 
     CLP.Log(CLP.L.player_loaded, player:GetFullName(), player.citizenid)
+    if CLP.Hooks then
+        CLP.Hooks:Fire('after:player:loaded', { src = src, citizenid = player.citizenid })
+    end
     return true
 end
 
@@ -147,6 +150,9 @@ function CLP.UnloadPlayer(src, reason)
     CLP.Identity.Invalidate(src)
     CLP.Log(CLP.L.player_dropped, player:GetFullName(), tostring(reason or 'unknown'))
     TriggerEvent(CLP.Events.PlayerDropped, src, reason, player)
+    if CLP.Hooks then
+        CLP.Hooks:Fire('after:player:dropped', { src = src, reason = reason, citizenid = player.citizenid })
+    end
 end
 
 -- ============================================================

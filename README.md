@@ -11,8 +11,8 @@
 |-------|--------|--------|
 | 0 | Skeleton, Core-Loader, DB-Schema, Identity, ESX-Bridge | erledigt |
 | 1 | Player-Persistence, User-Upsert, Char-Lifecycle, Auto-Save | erledigt |
-| **2** | Jobs/Grades-Registry, Default-Seed, Salary-Tick, Admin-Commands | aktuell |
-| 3 | Logger ausbauen (Discord-Webhook), Commands (/setjob /addmoney) | ⏳ geplant |
+| 2 | Jobs/Grades-Registry, Default-Seed, Salary-Tick, Admin-Commands | erledigt |
+| **3** | Hooks-System, Logger (Discord-Webhook, File, Levels), Notify-Erweiterung | aktuell |
 | 4 | `modules/ui` voll (Notify / Menu / Progress / Input — eigene NUI) | ⏳ geplant |
 | 5 | `modules/inventory` voll (Items, Slots, D&D, Hotbar, Drops, Trade) | ⏳ geplant |
 | 6 | `modules/vehicles` voll (Spawn, Garage, Keys, Persistence) | ⏳ geplant |
@@ -20,13 +20,21 @@
 | 8 | `modules/phone` Stub für späteres Phone-Resource | ⏳ geplant |
 | 9 | Doku, Migration-Guide ESX→CLP, Beispiel-Resource | ⏳ geplant |
 
-> **Aktuell: Phase 2 — Jobs / Salary aktiv.** Beim ersten Resource-Start werden
+> **Aktuell: Phase 3 — Hooks / Logger / Notify.** Es gibt jetzt ein generisches
+> Hook-System (`CLP.Hooks:Register/Fire`) mit Cancel-Faehigkeit (`before:*` Hooks
+> koennen Aktionen abbrechen). Das Logger-Modul kann jetzt strukturierte Levels
+> (debug/info/warn/error/audit), schreibt in eine optionale Logdatei und postet
+> Errors + Warnings (konfigurierbar) als Discord-Embed via Webhook. `CLP.Notify`
+> wurde um Broadcast-Helper erweitert: `NotifyAll`, `NotifyAdmins`, `NotifyJob`,
+> `NotifyGroup`. **Vorherige Status:** 
+>  Beim ersten Resource-Start werden
 > Default-Jobs (police, ambulance, fire, mechanic, taxi, tow, unemployed) inkl. Grades
 > in `clp_jobs` / `clp_job_grades` geseedet (idempotent, ueberschreibt nichts). Die
 > Jobs-Registry wird in-memory geladen und `CLP.Jobs:SetJob` validiert strikt. Ein
 > Salary-Tick (alle 10 Min, konfigurierbar) zahlt On-Duty-Spielern ihr Grade-Salary
 > in die Bank. Admin-Commands: `/setjob`, `/duty`, `/addmoney`, `/removemoney`,
-> `/joblist`, `/clpreloadjobs`. Char-Select-NUI kommt mit Phase 4.
+> `/joblist`, `/clpreloadjobs`. **Phase 3** fuegt `/clphooks` und `/clpannounce` hinzu.
+> Char-Select-NUI kommt mit Phase 4.
 
 ---
 
@@ -167,9 +175,29 @@ CLP.Jobs:SetDuty(src, true)
 CLP.Jobs:Register('lawyer', 'Anwalt', { whitelisted=true, category='company', grades={ [0]={label='Anwalt', salary=300} } })
 CLP.Jobs:Reload()                           -- Registry aus DB neu laden
 
--- Notify (Phase 2 stub; Phase 4 NUI)
+-- Notify (Phase 3)
 CLP.Notify(src, 'Hallo', 'success', 4000)
 CLP.NotifyAll('Server-Reboot in 5 Min', 'warning', 8000)
+CLP.NotifyAdmins('Spieler %d ist verdaechtig', src)        -- nur Admins
+CLP.NotifyGroup('mod', 'Mod-Channel', 'info', 5000)
+CLP.NotifyJob('police', 'Code 4', 'warning', 10000)
+
+-- Logger (Phase 3)
+CLP.Log.info('Spieler %d eingeloggt', src)
+CLP.Log.warn('Spieler %d hatte 5x den selben Identifier', src)
+CLP.Log.error('DB-Connection lost: %s', err)               -- -> Discord wenn konfiguriert
+CLP.Log.audit(citizenid, 'job_change', { from = 'A', to = 'B' }, 'admin_command')
+CLP.Log.toDiscord('info', 'Server-Restart', 'In 5 Min', { { name='By', value='admin' } })
+
+-- Hooks (Phase 3)
+CLP.Hooks:Register('before:money:add', function(ctx)
+    if ctx.amount > 1000000 then return false end           -- cancel
+end, 100)                                                   -- priority 100 (lauft fruh)
+CLP.Hooks:Register('after:job:change', function(ctx)
+    print(('Spieler %d ist jetzt %s'):format(ctx.src, ctx.to.name))
+end)
+CLP.Hooks:Fire('after:custom:event', { foo = 'bar' })
+local ok = CLP.Hooks:Fire('before:something')               -- false bei cancel
 
 -- DB
 CLP.DB.query('SELECT * FROM ...', { params })           -- async
@@ -227,7 +255,24 @@ CLP.Events.JobDuty          -- 'clp:job:duty'
 CLP.Events.UINotify         -- 'clp:ui:notify'         (S->C)
 ```
 
-### Admin-Commands (Phase 2)
+### Verfügbare Hooks
+
+| Hook | Cancel? | Payload |
+|------|---------|---------|
+| `before:money:add` | ja | `{ src, account, amount, reason }` |
+| `after:money:add`  | nein | `{ src, account, amount, old, new, reason }` |
+| `before:money:remove` | ja | `{ src, account, amount, reason }` |
+| `after:money:remove`  | nein | `{ src, account, amount, old, new, reason }` |
+| `before:job:change` | ja | `{ src, from, to, reason }` |
+| `after:job:change`  | nein | `{ src, from, to, reason }` |
+| `after:job:duty`    | nein | `{ src, on_duty, was }` |
+| `before:notify`     | ja | `{ src, message, type, duration }` |
+| `after:notify`      | nein | `{ src, message, type, duration }` |
+| `after:char:attach` | nein | `{ src, citizenid }` |
+| `after:player:loaded`  | nein | `{ src, citizenid }` |
+| `after:player:dropped` | nein | `{ src, reason, citizenid }` |
+
+### Admin-Commands (Phase 2 + 3)
 
 | Command | Beschreibung |
 |---------|--------------|
@@ -240,6 +285,23 @@ CLP.Events.UINotify         -- 'clp:ui:notify'         (S->C)
 | `/addmoney <id> <cash\|bank\|black_money> <amount>` | Geld hinzufuegen (Admin) |
 | `/removemoney <id> <cash\|bank\|black_money> <amount>` | Geld abziehen (Admin) |
 | `/clpreloadjobs` | Jobs-Registry aus DB neu laden (Admin) |
+| `/clphooks` | Liste aller registrierten Hooks (Admin) |
+| `/clpannounce <msg>` | Broadcast-Notify an alle (Admin) |
+
+### Logger-Config (Phase 3)
+
+```lua
+Config.LogToConsole       = true
+Config.LogToFile          = true
+Config.LogFilePath        = 'logs/clp_framework.log'
+Config.LogLevel           = 'info'   -- 'debug' | 'info' | 'warn' | 'error'
+
+-- Discord (optional)
+Config.LogDiscordHook     = 'https://discord.com/api/webhooks/...'  -- nil = aus
+Config.LogDiscordUsername = 'CLP-Framework'
+Config.LogDiscordLevels   = { 'error', 'warn' }    -- welche Levels Discord-Posten
+Config.LogDiscordAudit    = false                  -- alle audit()s ebenfalls posten
+```
 
 ### Client
 
