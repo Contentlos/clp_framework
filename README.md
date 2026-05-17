@@ -10,8 +10,8 @@
 | Phase | Inhalt | Status |
 |-------|--------|--------|
 | 0 | Skeleton, Core-Loader, DB-Schema, Identity, ESX-Bridge | erledigt |
-| **1** | Player-Persistence, User-Upsert, Char-Lifecycle (List/Create/Select/Delete), Auto-Save | aktuell |
-| 2 | Jobs/Grades-Registry, Salary-Tick, ESX-Job-Kompat | ⏳ geplant |
+| 1 | Player-Persistence, User-Upsert, Char-Lifecycle, Auto-Save | erledigt |
+| **2** | Jobs/Grades-Registry, Default-Seed, Salary-Tick, Admin-Commands | aktuell |
 | 3 | Logger ausbauen (Discord-Webhook), Commands (/setjob /addmoney) | ⏳ geplant |
 | 4 | `modules/ui` voll (Notify / Menu / Progress / Input — eigene NUI) | ⏳ geplant |
 | 5 | `modules/inventory` voll (Items, Slots, D&D, Hotbar, Drops, Trade) | ⏳ geplant |
@@ -20,11 +20,13 @@
 | 8 | `modules/phone` Stub für späteres Phone-Resource | ⏳ geplant |
 | 9 | Doku, Migration-Guide ESX→CLP, Beispiel-Resource | ⏳ geplant |
 
-> **Aktuell: Phase 1 — SkeletonMode ist AUS.** Spieler-Charaktere werden aus
-> `clp_characters` geladen, Geld/Job/Metadata werden auto-gespeichert (alle 5 Min +
-> bei Disconnect + bei Resource-Stop). Die Char-Select-NUI existiert noch nicht;
-> bis Phase 4 nutzen wir `Config.AutoCharSelect = true` — d.h. last-played wird
-> automatisch geladen, oder ein Default-Charakter wird angelegt.
+> **Aktuell: Phase 2 — Jobs / Salary aktiv.** Beim ersten Resource-Start werden
+> Default-Jobs (police, ambulance, fire, mechanic, taxi, tow, unemployed) inkl. Grades
+> in `clp_jobs` / `clp_job_grades` geseedet (idempotent, ueberschreibt nichts). Die
+> Jobs-Registry wird in-memory geladen und `CLP.Jobs:SetJob` validiert strikt. Ein
+> Salary-Tick (alle 10 Min, konfigurierbar) zahlt On-Duty-Spielern ihr Grade-Salary
+> in die Bank. Admin-Commands: `/setjob`, `/duty`, `/addmoney`, `/removemoney`,
+> `/joblist`, `/clpreloadjobs`. Char-Select-NUI kommt mit Phase 4.
 
 ---
 
@@ -155,9 +157,19 @@ CLP.Money:Remove(src, 'bank', 100, 'purchase')
 CLP.Money:Has(src, 'cash', 50)
 CLP.Money:Transfer(srcFrom, srcTo, 'cash', 100, 'tip')
 
--- Jobs
-CLP.Jobs:SetJob(src, 'police', 3, 'admin_promo')
+-- Jobs (Phase 2)
+CLP.Jobs:GetAll()                           -- { [name] = job }
+CLP.Jobs:Get('police')                      -- job-table | nil
+CLP.Jobs:GetGrade('police', 2)              -- grade-table | nil
+CLP.Jobs:Exists('police')                   -- bool
+CLP.Jobs:SetJob(src, 'police', 3, 'admin_promo')   -- validiert vs Registry
 CLP.Jobs:SetDuty(src, true)
+CLP.Jobs:Register('lawyer', 'Anwalt', { whitelisted=true, category='company', grades={ [0]={label='Anwalt', salary=300} } })
+CLP.Jobs:Reload()                           -- Registry aus DB neu laden
+
+-- Notify (Phase 2 stub; Phase 4 NUI)
+CLP.Notify(src, 'Hallo', 'success', 4000)
+CLP.NotifyAll('Server-Reboot in 5 Min', 'warning', 8000)
 
 -- DB
 CLP.DB.query('SELECT * FROM ...', { params })           -- async
@@ -210,7 +222,24 @@ CLP.Events.CharSelect       -- 'clp:char:select'       (C->S)
 CLP.Events.CharSelected     -- 'clp:char:selected'     (S->C)
 CLP.Events.CharDelete       -- 'clp:char:delete'       (C->S)
 CLP.Events.CharDeleted      -- 'clp:char:deleted'      (S->C)
+CLP.Events.JobChanged       -- 'clp:job:changed'
+CLP.Events.JobDuty          -- 'clp:job:duty'
+CLP.Events.UINotify         -- 'clp:ui:notify'         (S->C)
 ```
+
+### Admin-Commands (Phase 2)
+
+| Command | Beschreibung |
+|---------|--------------|
+| `/clpinfo` | Framework-Version + Phase + Online-Anzahl (alle) |
+| `/clpid` | Eigene Identifier + Citizen-ID anzeigen (alle) |
+| `/duty` | Eigenen Dienst-Status togglen (alle) |
+| `/clpwho` | Alle Online-Spieler mit Job/Citizen-ID (Admin) |
+| `/joblist` | Liste aller Jobs in Registry (Admin) |
+| `/setjob <id> <name> [grade] [reason]` | Job eines Spielers setzen (Admin) |
+| `/addmoney <id> <cash\|bank\|black_money> <amount>` | Geld hinzufuegen (Admin) |
+| `/removemoney <id> <cash\|bank\|black_money> <amount>` | Geld abziehen (Admin) |
+| `/clpreloadjobs` | Jobs-Registry aus DB neu laden (Admin) |
 
 ### Client
 

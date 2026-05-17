@@ -94,6 +94,22 @@ function Player:AttachCharacter(row)
     self.gang.name   = row.gang
     self.gang.grade  = tonumber(row.gang_grade) or 0
 
+    -- Job-Metadaten aus Registry anreichern (Phase 2)
+    if CLP.Jobs and CLP.Jobs.Get then
+        local j = CLP.Jobs:Get(self.job.name)
+        if j then
+            self.job.label = j.label
+            local g = j.grades and j.grades[self.job.grade]
+            if g then
+                self.job.grade_label = g.label
+                self.job.salary      = g.salary or 0
+            else
+                self.job.grade_label = '-'
+                self.job.salary      = 0
+            end
+        end
+    end
+
     -- JSON-Felder
     local meta = decode(row.metadata, { hunger = 100, thirst = 100, stress = 0 })
     if type(meta) == 'table' then self.metadata = meta end

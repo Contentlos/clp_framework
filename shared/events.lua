@@ -54,6 +54,12 @@ local E = {
     -- Doors (Phase 7+)
     DoorToggled        = 'clp:door:toggled',
 
+    -- UI / Notify (Phase 3; UI-NUI in Phase 4)
+    UINotify           = 'clp:ui:notify',          -- S->C: { message, type, duration }
+    UIProgressStart    = 'clp:ui:progressStart',   -- S->C: { label, duration, key }
+    UIProgressCancel   = 'clp:ui:progressCancel',  -- S->C: { key }
+    HooksCancelled     = 'clp:hooks:cancelled',    -- internal: hook chain abort marker
+
     -- Sicherheits-Events
     SecurityViolation  = 'clp:security:violation', -- S-only: { src, type, payload }
 }

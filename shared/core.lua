@@ -13,8 +13,8 @@
 -- ============================================================
 CLP = CLP or {
     -- Versions-Info
-    Version        = '0.2.0-phase1',
-    Phase          = 1,
+    Version        = '0.3.0-phase2',
+    Phase          = 2,
     ResourceName   = GetCurrentResourceName(),
 
     -- Welche Seite läuft? (server | client)

@@ -67,6 +67,12 @@ local L = {
     job_changed              = 'Job geändert: %s → %s (Grade %d)',
     job_unknown              = 'Unbekannter Job: %s',
     job_grade_unknown        = 'Unbekannter Grade für Job %s: %s',
+    job_not_attached         = 'Spieler hat keinen geladenen Charakter.',
+    job_set_self             = 'Du bist jetzt %s (%s).',
+    job_set_target           = '%s ist jetzt %s (%s).',
+    salary_paid              = 'Gehalt erhalten: %d$',
+    duty_on                  = 'Im Dienst.',
+    duty_off                 = 'Ausser Dienst.',
 
     -- ============================================================
     --  PERMISSIONS

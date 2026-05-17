@@ -76,6 +76,16 @@ function DB.delete(sql, params, cb)
     return DB.query(sql, params, cb)
 end
 
+--- Alias fuer querySync (nur in Init/Seeds verwenden, blockierend).
+function DB.executeSync(sql, params)
+    return DB.querySync(sql, params)
+end
+
+--- Alias fuer query (async). Nicht-blockierend; nutzt einen Coroutine-Yield.
+function DB.execute(sql, params, cb)
+    return DB.query(sql, params, cb)
+end
+
 -- ============================================================
 --  SCHEMA-APPLY
 --  Liest server/sql/schema.sql aus der Resource und führt jedes Statement

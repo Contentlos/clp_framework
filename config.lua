@@ -91,3 +91,15 @@ Config.DefaultCharGender    = 'm'   -- 'm' | 'f' | 'd'
 -- ============================================================
 Config.DefaultJob       = 'unemployed'
 Config.DefaultJobGrade  = 0
+
+-- ============================================================
+--  JOBS / SALARY  (Phase 2)
+--
+--  Jobs werden beim ersten Resource-Start aus shared/jobs.default.lua
+--  in clp_jobs / clp_job_grades geseedet (idempotent).
+--  Server-Owner kann die Tabellen anschliessend frei editieren.
+-- ============================================================
+Config.SalaryEnabled     = true
+Config.SalaryInterval    = 10 * 60 * 1000   -- alle 10 Min Gehalt zahlen
+Config.SalaryRequireDuty = true             -- false = Gehalt auch off-duty zahlen
+
