@@ -1,15 +1,18 @@
 --[[
-    clp_framework — Client Event-Wiring (Phase 0: minimal)
+    clp_framework — Client Event-Wiring
 
-    In Phase 1 wandern hier die Spawn-/Respawn-/Death-Hooks rein.
+    Wichtig: 'esx:onPlayerSpawn' darf NUR feuern wenn der Spieler auch
+    geladen ist (CLP.IsLoaded == true). Sonst greifen ESX-Resources
+    (z.B. skinchanger) auf eine leere PlayerData zu und crashen mit
+    "attempt to index a nil value (field 'metadata')".
 ]]
 
 -- ============================================================
---  PLAYER SPAWNED (Phase 0: nur lokales Event feuern)
+--  PLAYER SPAWNED
 -- ============================================================
 AddEventHandler('playerSpawned', function()
     TriggerEvent(CLP.Events.PlayerSpawned)
-    if Config.EmitEsxEvents then
+    if Config.EmitEsxEvents and CLP.IsLoaded then
         TriggerEvent('esx:onPlayerSpawn')
     end
 end)

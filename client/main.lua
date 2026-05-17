@@ -40,6 +40,10 @@ RegisterNetEvent(CLP.Events.PlayerLoaded, function(playerData)
     -- ESX-Kompatibilität: Resources hören häufig 'esx:playerLoaded'
     if Config.EmitEsxEvents then
         TriggerEvent('esx:playerLoaded', CLP.PlayerData)
+        -- skinchanger / appearance hängt sich oft an esx:onPlayerSpawn; nach
+        -- erfolgreichem Load nachholen, weil wir in client/events.lua den
+        -- ersten Spawn (ohne Daten) bewusst skippen.
+        TriggerEvent('esx:onPlayerSpawn')
     end
 end)
 

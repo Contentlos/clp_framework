@@ -125,9 +125,12 @@ local CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' -- ohne 0/O/1/I/L für Lesbarke
 
 -- Lua 5.4: math.randomseed verlangt Integer. Einmaliger Seed beim Laden
 -- reicht voellig fuer Citizen-IDs (DB-Eindeutigkeitscheck folgt sowieso).
+-- Wichtig: os-Lib gibt es im Client-Lua nicht; deshalb guarden.
 do
-    local seed = math.floor(os.time())
+    local seed = 0
+    if os and os.time then seed = seed + math.floor(os.time()) end
     if GetGameTimer then seed = seed + math.floor(GetGameTimer()) end
+    if seed == 0 then seed = math.floor(math.random() * 2 ^ 31) end
     math.randomseed(seed)
 end
 
