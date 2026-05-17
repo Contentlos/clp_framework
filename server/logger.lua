@@ -64,4 +64,11 @@ function Logger.audit(citizenid, logType, payload, actor)
     )
 end
 
+-- Backwards-Compat: CLP.Log(...) als Funktion aufrufbar machen,
+-- obwohl wir hier eine Tabelle registrieren. Sonst knallt jeder
+-- bestehende CLP.Log(...)-Aufruf (z.B. server/main.lua, bridge/esx.lua).
+setmetatable(Logger, {
+    __call = function(_, msg, ...) Logger.info(msg, ...) end,
+})
+
 CLP.RegisterModule('Log', Logger)
